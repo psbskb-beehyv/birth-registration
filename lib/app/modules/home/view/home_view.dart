@@ -1,9 +1,12 @@
 import 'package:birth_registration/app/data/child_data/child_data.dart';
 import 'package:birth_registration/app/modules/home/cubits/child_data_cubit.dart';
 import 'package:birth_registration/app/modules/home/handler/home_handler.dart';
+import 'package:birth_registration/dependency/child_data_service.dart';
 import 'package:digit_components/digit_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 class HomeView extends StatelessWidget {
@@ -30,6 +33,7 @@ class HomeWidget extends StatelessWidget {
         titleSpacing: 0,
         leadingWidth: 0,
         pinned: true,
+        backgroundColor: Colors.white,
         title: SizedBox(
           height: 70,
           width: MediaQuery.of(context).size.width,
@@ -199,7 +203,10 @@ class ChildDataWidget extends StatelessWidget {
       child: DigitCard(
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.all(16),
-        onPressed: () {},
+        onPressed: () {
+          GetIt.instance<ChildDataService>().update(childData);
+          context.go('/edit_details');
+        },
         child: Column(
           children: [
             Expanded(
@@ -218,35 +225,36 @@ class ChildDataWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Baby Name',
+                                '${childData.babyFirstName} ${childData.babyLastName ?? ''}',
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(
-                                'Father: Rahul Behera',
+                                'Father- ${childData.father.name ?? childData.father.userName}',
                                 style: Theme.of(context).textTheme.titleSmall,
                               ),
                               Text(
-                                'Mother: Sam Behera',
+                                'Mother- ${childData.mother.name ?? childData.mother.userName}',
                                 style: Theme.of(context).textTheme.titleSmall,
                               ),
                             ],
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Icon(Icons.av_timer, size: 30),
-                            Text(
-                              '00:00',
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            Text(
-                              '12 Apr 2024',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
-                        )
+                        if (childData.timeOfBirth != null)
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Icon(Icons.av_timer, size: 30),
+                              Text(
+                                '00:00',
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              Text(
+                                '12 Apr 2024',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            ],
+                          )
                       ],
                     ),
                   ),
@@ -259,13 +267,13 @@ class ChildDataWidget extends StatelessWidget {
                 children: [
                   const Icon(Icons.local_hospital_rounded, size: 15),
                   Text(
-                    'Apollo Hospital (Dr. Name)',
+                    '${childData.hospitalName} (Dr. ${childData.doctorName})',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const Spacer(),
                   const Icon(Icons.place, size: 15),
                   Text(
-                    'Banglore',
+                    childData.placeOfBirth,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],

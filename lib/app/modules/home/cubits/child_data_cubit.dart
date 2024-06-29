@@ -13,7 +13,14 @@ class ChildDataCubit extends Cubit<List<ChildData>> {
   }
 
   updateChildData(ChildData childData) {
-    state.add(childData);
-    emit(state);
+    int index = childDataList
+        .indexWhere((element) => element.tenantId == childData.tenantId);
+    if (index == -1) {
+      childDataList.add(childData);
+    } else {
+      childDataList[index] = childData;
+    }
+    final Iterable<ChildData> childDataListI = List.unmodifiable(childDataList);
+    emit(childDataListI.toList());
   }
 }

@@ -4,7 +4,10 @@ import 'package:digit_components/theme/digit_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dependency/injector.dart';
+
 void main() {
+  Injector.init();
   runApp(const MyApp());
 }
 
