@@ -7,8 +7,14 @@ class ChildDataCubit extends Cubit<List<ChildData>> {
 
   List<ChildData> childDataList = [];
 
-  loadChildData() async {
+  loadChildData({String? firstName}) async {
     childDataList = await GlobalHandler.readChildDemoData();
+    if (firstName != null) {
+      List<ChildData> _childDataList = childDataList
+          .where((element) => element.babyFirstName == firstName)
+          .toList();
+      return emit(_childDataList);
+    }
     emit(childDataList);
   }
 

@@ -31,7 +31,7 @@ class CreateWidget extends StatelessWidget {
           backgroundColor: Theme.of(context).primaryColor,
           leading: IconButton(
             onPressed: () {
-              context.pop();
+              context.pop(true);
             },
             icon: const Icon(
               Icons.arrow_back_ios,
@@ -41,7 +41,7 @@ class CreateWidget extends StatelessWidget {
           titleSpacing: -20,
           title: TextButton(
               onPressed: () {
-                context.pop();
+                context.pop(true);
               },
               child: Text(
                 'Birth Registration',

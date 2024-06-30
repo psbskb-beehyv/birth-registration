@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
 class HomeView extends StatelessWidget {
@@ -27,56 +28,11 @@ class HomeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SliverAppBar createSilverAppBar2(bool innerBoxIsScrolled) {
-      return SliverAppBar(
-        toolbarHeight: 70,
-        titleSpacing: 0,
-        leadingWidth: 0,
-        pinned: true,
-        backgroundColor: Colors.white,
-        title: SizedBox(
-          height: 70,
-          width: MediaQuery.of(context).size.width,
-          child: Row(
-            children: [
-              const Expanded(
-                child: DigitSearchBar(
-                  contentPadding: EdgeInsets.all(8),
-                  margin: EdgeInsets.all(8),
-                  hintText: 'Search',
-                ),
-              ),
-              if (innerBoxIsScrolled)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: MaterialButton(
-                      onPressed: () {
-                        HomeHandler.addChild(context);
-                      },
-                      height: 70,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50)),
-                      color: Theme.of(context).primaryColor,
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                )
-            ],
-          ),
-        ),
-      );
-    }
-
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           const SilverAppBarMainHome(),
-          createSilverAppBar2(innerBoxIsScrolled),
+          SilverAppBarSearch(innerBoxIsScrolled: innerBoxIsScrolled),
         ];
       },
       body: BlocBuilder<ChildDataCubit, List<ChildData>>(
@@ -110,6 +66,65 @@ class HomeWidget extends StatelessWidget {
                     );
                   });
         },
+      ),
+    );
+  }
+}
+
+class SilverAppBarSearch extends StatelessWidget {
+  final bool innerBoxIsScrolled;
+  const SilverAppBarSearch({
+    super.key,
+    required this.innerBoxIsScrolled,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      toolbarHeight: 70,
+      titleSpacing: 0,
+      leadingWidth: 0,
+      pinned: true,
+      backgroundColor: Colors.white,
+      title: SizedBox(
+        height: 70,
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          children: [
+            Expanded(
+              child: DigitSearchBar(
+                contentPadding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.all(8),
+                hintText: 'Search',
+                onChanged: (value) {
+                  context
+                      .read<ChildDataCubit>()
+                      .loadChildData(firstName: value == '' ? null : value);
+                },
+              ),
+            ),
+            if (innerBoxIsScrolled)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: MaterialButton(
+                    onPressed: () {
+                      HomeHandler.addChild(context);
+                    },
+                    height: 70,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50)),
+                    color: Theme.of(context).primaryColor,
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              )
+          ],
+        ),
       ),
     );
   }
@@ -197,6 +212,9 @@ class ChildDataWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime? timeOfBirth = childData.timeOfBirth != null
+        ? DateTime.parse(childData.timeOfBirth!)
+        : null;
     return SizedBox(
       height: 150,
       width: MediaQuery.of(context).size.width,
@@ -212,10 +230,10 @@ class ChildDataWidget extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  SizedBox(
-                      height: 50,
-                      child: Image.asset('assets/images/family.png')),
-                  const SizedBox(width: 16),
+                  // SizedBox(
+                  //     height: 50,
+                  //     child: Image.asset('assets/images/family.png')),
+                  // const SizedBox(width: 16),
                   Expanded(
                     child: Row(
                       children: [
@@ -224,33 +242,67 @@ class ChildDataWidget extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '${childData.babyFirstName} ${childData.babyLastName ?? ''}',
-                                style: Theme.of(context).textTheme.titleMedium,
+                              Row(
+                                children: [
+                                  SizedBox(
+                                      height: 15,
+                                      child:
+                                          Image.asset('assets/icons/baby.png')),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${childData.babyFirstName} ${childData.babyLastName ?? ''}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Father- ${childData.father.name ?? childData.father.userName}',
-                                style: Theme.of(context).textTheme.titleSmall,
+                              Row(
+                                children: [
+                                  SizedBox(
+                                      height: 15,
+                                      child: Image.asset(
+                                          'assets/icons/father.png')),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    childData.father.name ??
+                                        childData.father.userName,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Mother- ${childData.mother.name ?? childData.mother.userName}',
-                                style: Theme.of(context).textTheme.titleSmall,
+                              Row(
+                                children: [
+                                  SizedBox(
+                                      height: 15,
+                                      child: Image.asset(
+                                          'assets/icons/mother.png')),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    childData.mother.name ??
+                                        childData.mother.userName,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                        if (childData.timeOfBirth != null)
+                        if (timeOfBirth != null)
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               const Icon(Icons.av_timer, size: 30),
                               Text(
-                                '00:00',
+                                DateFormat("HH:mm").format(timeOfBirth),
                                 style: Theme.of(context).textTheme.labelLarge,
                               ),
                               Text(
-                                '12 Apr 2024',
+                                DateFormat("dd MMM yyyy").format(timeOfBirth),
                                 style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],
