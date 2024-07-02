@@ -74,6 +74,8 @@ class CreateHandler {
 
   static Future<void> createNewChildData(
       BuildContext context, List<ChildData> childDataList) async {
+    print(
+        'preDateTime create_date ${childDataFromGroup.control('timeOfBirth').value}');
     if (childDataFromGroup.valid &&
         fatherDataFromGroup.valid &&
         motherDataFromGroup.valid) {

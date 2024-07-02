@@ -155,24 +155,10 @@ class EditDetailsWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      border: Border.all(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: DigitDateFormPicker(
-                    label: "Time Of Birth",
-                    formControlName: 'timeOfBirth',
-                    isRequired: false,
-                    isEnabled: true,
-                    initialDate: DateTime.now(),
-                    confirmText: "Confirm",
-                    cancelText: "Cancel",
-                  ),
+                DateTimeFormField(
+                  label: "Time Of Birth",
+                  formControlName: 'timeOfBirth',
+                  formGroup: editDetailsHandler.childDataFromGroup,
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -254,6 +240,102 @@ class EditDetailsWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class DateTimeFormField extends StatefulWidget {
+  final String label;
+  final String formControlName;
+  final FormGroup formGroup;
+  const DateTimeFormField({
+    super.key,
+    required this.formControlName,
+    required this.label,
+    required this.formGroup,
+  });
+
+  @override
+  State<DateTimeFormField> createState() => _DateTimeFormFieldState();
+}
+
+class _DateTimeFormFieldState extends State<DateTimeFormField> {
+  TimeOfDay pickedTime = TimeOfDay.now();
+  @override
+  Widget build(BuildContext context) {
+    DateTime preDateTime =
+        widget.formGroup.control(widget.formControlName).value ??
+            DateTime.now();
+    setState(() {
+      pickedTime =
+          TimeOfDay(hour: preDateTime.hour, minute: preDateTime.minute);
+    });
+    print("preDateTime $preDateTime");
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border.all(
+                color: Theme.of(context).primaryColor,
+              ),
+              borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: DigitDateFormPicker(
+            label: widget.label,
+            formControlName: widget.formControlName,
+            isRequired: false,
+            isEnabled: true,
+            initialDate: preDateTime,
+            confirmText: "Confirm",
+            cancelText: "Cancel",
+          ),
+        ),
+        Align(
+            alignment: Alignment.topRight,
+            child: InkWell(
+              onTap: () async {
+                TimeOfDay? _pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay(
+                      hour: preDateTime.hour, minute: preDateTime.minute),
+                  builder: (BuildContext context, Widget? child) {
+                    return Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: child ?? Container(),
+                    );
+                  },
+                );
+                setState(() {
+                  pickedTime = _pickedTime ??
+                      TimeOfDay(
+                          hour: preDateTime.hour, minute: preDateTime.minute);
+                });
+                DateTime newDate = DateTime(preDateTime.year, preDateTime.month,
+                    preDateTime.day, pickedTime.hour, pickedTime.minute);
+                widget.formGroup
+                    .control(widget.formControlName)
+                    .updateValue(newDate);
+                print("preDateTime $newDate");
+              },
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  pickedTime.format(context),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall!
+                      .copyWith(color: Colors.white),
+                ),
+              ),
+            )),
+      ],
     );
   }
 }
