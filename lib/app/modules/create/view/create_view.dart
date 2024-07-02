@@ -89,6 +89,16 @@ class CreateWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+                UserFormWidget(
+                  title: 'Father',
+                  formGroup: CreateHandler.fatherDataFromGroup,
+                ),
+                const SizedBox(height: 8),
+                UserFormWidget(
+                  title: 'Mother',
+                  formGroup: CreateHandler.motherDataFromGroup,
+                ),
+                const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
@@ -234,6 +244,72 @@ class CreateWidget extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class UserFormWidget extends StatelessWidget {
+  final String title;
+  final FormGroup formGroup;
+  const UserFormWidget(
+      {super.key, required this.title, required this.formGroup});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ReactiveForm(
+        formGroup: formGroup,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: Colors.white),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              child: const DigitTextFormField(
+                isRequired: true,
+                label: 'User Name',
+                formControlName: 'userName',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              child: const DigitTextFormField(
+                isRequired: true,
+                label: 'Name',
+                formControlName: 'name',
+              ),
+            ),
+          ],
         ),
       ),
     );

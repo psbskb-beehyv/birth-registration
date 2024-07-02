@@ -45,23 +45,54 @@ class CreateHandler {
     ),
   });
 
+  static final fatherDataFromGroup = FormGroup({
+    'tenantId': FormControl<String>(
+      value: '',
+    ),
+    'userName': FormControl<String>(
+      value: '',
+      validators: [Validators.required],
+    ),
+    'name': FormControl<String>(
+      value: '',
+      validators: [Validators.required],
+    ),
+  });
+  static final motherDataFromGroup = FormGroup({
+    'tenantId': FormControl<String>(
+      value: '',
+    ),
+    'userName': FormControl<String>(
+      value: '',
+      validators: [Validators.required],
+    ),
+    'name': FormControl<String>(
+      value: '',
+      validators: [Validators.required],
+    ),
+  });
+
   static Future<void> createNewChildData(
       BuildContext context, List<ChildData> childDataList) async {
-    if (childDataFromGroup.valid) {
+    if (childDataFromGroup.valid &&
+        fatherDataFromGroup.valid &&
+        motherDataFromGroup.valid) {
       ChildData childData = ChildData(
         id: Uuid().v1(),
         tenantId: (childDataList.length + 1).toString(),
         applicationNumber: Uuid().v1(),
         babyFirstName: childDataFromGroup.control('babyFirstName').value,
         babyLastName: childDataFromGroup.control('babyLastName').value,
-        father: const UserData(
-          tenantId: 'tenantId',
-          userName: 'userName',
+        father: UserData(
+          tenantId: Uuid().v1(),
+          userName: fatherDataFromGroup.control('userName').value,
+          name: fatherDataFromGroup.control('name').value,
           roles: [],
         ),
-        mother: const UserData(
-          tenantId: 'tenantId',
-          userName: 'userName',
+        mother: UserData(
+          tenantId: Uuid().v1(),
+          userName: fatherDataFromGroup.control('userName').value,
+          name: fatherDataFromGroup.control('name').value,
           roles: [],
         ),
         doctorName: childDataFromGroup.control('doctorName').value,
@@ -75,6 +106,9 @@ class CreateHandler {
         workflow: childDataFromGroup.control('workflow').value,
         auditDetails: childDataFromGroup.control('auditDetails').value,
       );
+      childDataFromGroup.reset();
+      fatherDataFromGroup.reset();
+      motherDataFromGroup.reset();
       context.read<ChildDataCubit>().updateChildData(childData);
       context.go('/');
     } else {

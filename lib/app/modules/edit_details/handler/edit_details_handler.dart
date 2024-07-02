@@ -1,4 +1,5 @@
 import 'package:birth_registration/app/data/child_data/child_data.dart';
+import 'package:birth_registration/app/data/user_data/user_data.dart';
 import 'package:birth_registration/app/modules/home/cubits/child_data_cubit.dart';
 import 'package:digit_components/widgets/atoms/digit_toaster.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:reactive_forms/reactive_forms.dart';
 
 class EditDetailsHandler {
   late FormGroup childDataFromGroup;
+  late FormGroup fatherDataFromGroup;
+  late FormGroup motherDataFromGroup;
   final ChildData childData;
   EditDetailsHandler({required this.childData}) {
     childDataFromGroup = FormGroup({
@@ -46,19 +49,59 @@ class EditDetailsHandler {
         value: childData.auditDetails ?? '',
       ),
     });
+    fatherDataFromGroup = FormGroup({
+      'tenantId': FormControl<String>(
+        value: childData.father.tenantId,
+      ),
+      'userName': FormControl<String>(
+        disabled: true,
+        value: childData.father.userName,
+        validators: [Validators.required],
+      ),
+      'name': FormControl<String>(
+        value: childData.father.name,
+        validators: [Validators.required],
+      ),
+    });
+    motherDataFromGroup = FormGroup({
+      'tenantId': FormControl<String>(
+        value: childData.father.tenantId,
+      ),
+      'userName': FormControl<String>(
+        disabled: true,
+        value: childData.father.userName,
+        validators: [Validators.required],
+      ),
+      'name': FormControl<String>(
+        value: childData.father.name,
+        validators: [Validators.required],
+      ),
+    });
   }
 
   Future<void> createNewChildData(
       BuildContext context, List<ChildData> childDataList) async {
-    if (childDataFromGroup.valid) {
+    if (childDataFromGroup.valid &&
+        fatherDataFromGroup.valid &&
+        motherDataFromGroup.valid) {
       ChildData _childData = ChildData(
         id: childData.id,
         tenantId: childData.tenantId,
         applicationNumber: childData.applicationNumber,
         babyFirstName: childDataFromGroup.control('babyFirstName').value,
         babyLastName: childDataFromGroup.control('babyLastName').value,
-        father: childData.father,
-        mother: childData.mother,
+        father: UserData(
+          tenantId: childData.father.tenantId,
+          userName: fatherDataFromGroup.control('userName').value,
+          name: fatherDataFromGroup.control('name').value,
+          roles: [],
+        ),
+        mother: UserData(
+          tenantId: childData.mother.tenantId,
+          userName: motherDataFromGroup.control('userName').value,
+          name: motherDataFromGroup.control('name').value,
+          roles: [],
+        ),
         doctorName: childDataFromGroup.control('doctorName').value,
         hospitalName: childDataFromGroup.control('hospitalName').value,
         placeOfBirth: childDataFromGroup.control('placeOfBirth').value,
