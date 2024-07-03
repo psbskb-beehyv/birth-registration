@@ -2,11 +2,13 @@ import 'package:birth_registration/app/data/child_data/child_data.dart';
 import 'package:birth_registration/app/modules/edit_details/handler/edit_details_handler.dart';
 import 'package:birth_registration/app/modules/home/cubits/child_data_cubit.dart';
 import 'package:birth_registration/dependency/child_data_service.dart';
+import 'package:birth_registration/extentions/custom_digit_date_form_picker.dart';
 import 'package:digit_components/digit_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 class EditDetailsView extends StatelessWidget {
@@ -15,9 +17,8 @@ class EditDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ChildData? childData = GetIt.instance<ChildDataService>().childData;
-    print(childData!.toJson());
     return SafeArea(
-      child: EditDetailsWidget(childData: childData),
+      child: EditDetailsWidget(childData: childData!),
     );
   }
 }
@@ -260,17 +261,31 @@ class DateTimeFormField extends StatefulWidget {
 }
 
 class _DateTimeFormFieldState extends State<DateTimeFormField> {
-  TimeOfDay pickedTime = TimeOfDay.now();
+  TimeOfDay? pickedTime;
+  DateTime? preDateTime;
+  NumberFormat formatter = new NumberFormat("00");
+  @override
+  void initState() {
+    setState(() {
+      preDateTime = widget.formGroup.control(widget.formControlName).value;
+      pickedTime = preDateTime == null
+          ? null
+          : TimeOfDay(hour: preDateTime!.hour, minute: preDateTime!.minute);
+    });
+    super.initState();
+  }
+
+  assignDate({DateTime? date, TimeOfDay? time}) {
+    DateTime _date = date ?? preDateTime ?? DateTime.now();
+    TimeOfDay _time =
+        time ?? pickedTime ?? TimeOfDay(hour: _date.hour, minute: _date.minute);
+    DateTime? newDate =
+        DateTime(_date.year, _date.month, _date.day, _time.hour, _time.minute);
+    widget.formGroup.control(widget.formControlName).updateValue(newDate);
+  }
+
   @override
   Widget build(BuildContext context) {
-    DateTime preDateTime =
-        widget.formGroup.control(widget.formControlName).value ??
-            DateTime.now();
-    setState(() {
-      pickedTime =
-          TimeOfDay(hour: preDateTime.hour, minute: preDateTime.minute);
-    });
-    print("preDateTime $preDateTime");
     return Stack(
       children: [
         Container(
@@ -281,7 +296,7 @@ class _DateTimeFormFieldState extends State<DateTimeFormField> {
               ),
               borderRadius: BorderRadius.circular(10)),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: DigitDateFormPicker(
+          child: CustomDigitDateFormPicker(
             label: widget.label,
             formControlName: widget.formControlName,
             isRequired: false,
@@ -289,6 +304,9 @@ class _DateTimeFormFieldState extends State<DateTimeFormField> {
             initialDate: preDateTime,
             confirmText: "Confirm",
             cancelText: "Cancel",
+            onChangeOfDate: (value) {
+              assignDate(date: value);
+            },
           ),
         ),
         Align(
@@ -297,26 +315,18 @@ class _DateTimeFormFieldState extends State<DateTimeFormField> {
               onTap: () async {
                 TimeOfDay? _pickedTime = await showTimePicker(
                   context: context,
-                  initialTime: TimeOfDay(
-                      hour: preDateTime.hour, minute: preDateTime.minute),
-                  builder: (BuildContext context, Widget? child) {
-                    return Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: child ?? Container(),
-                    );
-                  },
+                  initialTime: preDateTime == null
+                      ? const TimeOfDay(hour: 0, minute: 0)
+                      : TimeOfDay(
+                          hour: preDateTime!.hour, minute: preDateTime!.minute),
                 );
-                setState(() {
-                  pickedTime = _pickedTime ??
-                      TimeOfDay(
-                          hour: preDateTime.hour, minute: preDateTime.minute);
-                });
-                DateTime newDate = DateTime(preDateTime.year, preDateTime.month,
-                    preDateTime.day, pickedTime.hour, pickedTime.minute);
-                widget.formGroup
-                    .control(widget.formControlName)
-                    .updateValue(newDate);
-                print("preDateTime $newDate");
+                if (_pickedTime != null) {
+                  setState(() {
+                    pickedTime = TimeOfDay(
+                        hour: _pickedTime.hour, minute: _pickedTime.minute);
+                  });
+                  assignDate(time: pickedTime);
+                }
               },
               child: Container(
                 margin: const EdgeInsets.all(8),
@@ -327,7 +337,9 @@ class _DateTimeFormFieldState extends State<DateTimeFormField> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  pickedTime.format(context),
+                  pickedTime == null
+                      ? '_:_ __'
+                      : '${formatter.format(pickedTime!.hour)}:${formatter.format(pickedTime!.minute)}',
                   style: Theme.of(context)
                       .textTheme
                       .labelSmall!
