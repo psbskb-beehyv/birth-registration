@@ -65,15 +65,15 @@ class EditDetailsHandler {
     });
     motherDataFromGroup = FormGroup({
       'tenantId': FormControl<String>(
-        value: childData.father.tenantId,
+        value: childData.mother.tenantId,
       ),
       'userName': FormControl<String>(
         disabled: true,
-        value: childData.father.userName,
+        value: childData.mother.userName,
         validators: [Validators.required],
       ),
       'name': FormControl<String>(
-        value: childData.father.name,
+        value: childData.mother.name,
         validators: [Validators.required],
       ),
     });
